@@ -3,19 +3,14 @@
 import os
 import sys
 
+esc_char = '\x1b'
+
 def main():
-    if len(sys.argv) == 1:
-        show_err("must have at least one argument")
-
-    flags = sys.argv[1:-1]
-
-    str_arg = esc_seq(flags) + sys.argv[-1]
-
-    os.system(f"echo -e \"{str_arg}\"")
-
-###################################
-############   utils   ############
-###################################
+	if len(sys.argv) == 1:
+		show_err("must have at least one argument")
+	
+	mod_code = esc_seq(sys.argv[1:-1])
+	print(mod_code + sys.argv[-1], end='')	
 
 def show_err(msg):
   print(f"error: {msg}")
@@ -23,16 +18,15 @@ def show_err(msg):
 
 # converts list of keys to their escape sequence
 # eg [bold, black] becomes \e[1;30m
-# doesn't handle nums=[], caller must handle
 def esc_seq(keys):
     codes = []
     for key in keys:
         if key in mod_map:
             codes.append(str(mod_map[key]))
         else:
-            show_err(f"\'{key}\' is an invalid color mod")
+            show_err(f"\'{key}\' is an invalid mod code")
     joined = ";".join(codes)
-    return f"\\e[{joined}m"
+    return f"{esc_char}[{joined}m"
 
 mod_map = {
   'reset': 0,
@@ -61,5 +55,16 @@ mod_map = {
   'bcyan':96,
   'bwhite': 97,
 }
+
+for r in [
+	range(0,38),
+	range(39,48),
+	range(49,55),
+	range(59,66),
+	range(73,76),
+	range(90,98),
+	range(100,108)]:
+	for x in r:
+		mod_map.update( {str(x): x} )
 
 main()
